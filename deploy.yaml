@@ -1,0 +1,57 @@
+---
+- name: Run shakesapp demo
+  hosts: shakesapp
+  remote_user: demo
+
+  vars:
+  - go_version: 1.16
+  - go_binary: "/opt/go/bin/go"
+
+  tasks:
+  - name: Update apt packages
+    ansible.builtin.apt:
+      pkg:
+      - wget
+      - unzip
+      update_cache: yes
+    become: yes
+
+  - name: Download and expand Go tarball
+    ansible.builtin.unarchive:
+      src: https://golang.org/dl/go{{ go_version }}.linux-amd64.tar.gz
+      dest: /opt
+      mode: 0755
+      remote_src: yes
+    become: yes
+
+  - name: Download and expand golang-sample
+    ansible.builtin.unarchive:
+      src: https://github.com/GoogleCloudPlatform/golang-samples/archive/master.zip
+      dest: ~/
+      remote_src: yes
+
+  - name: Build shakesapp
+    ansible.builtin.shell:
+      cmd: "{{ go_binary }} build -o app"
+      chdir: golang-samples-master/profiler/shakesapp
+
+  - name: Move shakesapp to /usr/local/bin
+    ansible.builtin.shell:
+      cmd: mv golang-samples-master/profiler/shakesapp/app /usr/local/bin
+    become: yes
+
+  - name: Copy systemd service file
+    ansible.builtin.copy:
+      src: app.service
+      dest: /etc/systemd/system/
+      owner: root
+      group: root
+      mode: 0755
+    become: yes
+
+  - name: Run shakesapp as daemon
+    ansible.builtin.systemd:
+      state: started
+      name: app
+      enabled: yes
+    become: yes
