@@ -1,9 +1,10 @@
 ---
 - name: Run shakesapp demo
   hosts: shakesapp
-  remote_user: demo
 
   vars:
+  - ansible_user: demo
+  - ansible_ssh_private_key_file: ~/.ssh/gcp_terraform
   - go_version: 1.16
   - go_binary: "/opt/go/bin/go"
 
