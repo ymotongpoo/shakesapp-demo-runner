@@ -58,7 +58,7 @@ provider "google" {
 locals {
     ansible_inventory = <<-EOT
         ---
-        plugin: google.cloud.gcp_compute
+        plugin: gcp_compute
         auth_kind: serviceaccount
         service_account_file: "${var.gcp_service_account_file}"
         zones:
@@ -79,7 +79,7 @@ resource "local_file" "ansible_inventory_file" {
 
 resource "google_compute_instance" "shakesapp" {
     name = "shakesapp"
-    machine_type = "e2-standard-4"
+    machine_type = "e2-standard-2"
     zone = var.zone
     tags = ["shakesapp-demo"]
 
